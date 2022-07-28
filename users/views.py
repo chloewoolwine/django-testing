@@ -1,10 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 import pyrebase
-# Create your views here.
-#def homePageView(request):
-#    return HttpResponse("hello world <3")
-
 
 # Your web app's Firebase configuration
 firebaseConfig = {
@@ -21,18 +17,12 @@ firebase = pyrebase.initialize_app(firebaseConfig)
 authe = firebase.auth()
 database = firebase.database()
 
-def home(request):
-    #todo: unique number identification for classes
-    students_data = database.child('class').child('students').get()
-    students = []
-    for student_data in students_data.each():
-        print(student_data.key())
-        students.append(student_data.val())
+def logIn(request):
+    return render(request, 'users/login.html')
 
-    context = {
-        'students' : students
-    }
-    return render(request, 'pages/home.html', context)
+def postLogIn(request):
+    email = request.POST.get('email')
+    pasw = request.POST.get('pass')
+    print(email)
 
-def about(request):
-    return render(request, 'pages/about.html', {'title':'about'})
+    return render(request, 'pages/home.html')
