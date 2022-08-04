@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
+from .forms import LoginForm, RegisterForm, ResetPasswordForm
 import pyrebase
 
 # Your web app's Firebase configuration
@@ -17,12 +18,68 @@ firebase = pyrebase.initialize_app(firebaseConfig)
 authe = firebase.auth()
 database = firebase.database()
 
-def logIn(request):
-    return render(request, 'users/login.html')
+def login(request):
+  if(request.method == 'POST'):
+    form = LoginForm(request.POST)
+    if form.is_valid():
+      email = request.POST.get('username')
+      pasw = request.POST.get('password')
+      print(email) 
+      try:
+        user = authe.sign_in_with_email_and_password(email, pasw)
+      except:
+        message = "Invalid Credentials! D:"
+        return render(request, 'users/login.html', {"message":message})
+      session_id = user['idToken']
+      request.session['uid'] = str(session_id)
+      return HttpResponseRedirect('/') #goes to home page again
+  context = {}
+  context['form'] = LoginForm()
+  return render(request, 'users/login.html', context)
 
-def postLogIn(request):
+def logout(request):
+  try:
+    del request.session['uid']
+  except:
+    pass
+  context = {}
+  context['form'] = LoginForm()
+  return render(request, 'users/login.html', context=context)
+
+def reset(request):
+  if(request.method == 'POST'):
     email = request.POST.get('email')
-    pasw = request.POST.get('pass')
-    print(email)
+    try:
+        authe.send_password_reset_email(email)
+        message  = "A email to reset password is successfully sent"        
+        print(message)
+        return HttpResponseRedirect('/')
+    except:
+        message  = "Something went wrong, Please check the email you provided is registered or not"
+        print(message)
+        return render(request, "users/reset.html", {"msg":message})
+  
+  context = {}
+  context['form'] = ResetPasswordForm() 
+  return render(request, "users/reset.html", context)
 
-    return render(request, 'pages/home.html')
+def register(request):
+  if(request.method == 'POST'):
+    email = request.POST.get('email')
+    pasw = request.POST.get('password')
+    try:
+      # creating a user with the given email and password
+      user=authe.create_user_with_email_and_password(email,pasw)
+      uid = user['localId']
+      idtoken = request.session['uid']
+      print(uid)
+      return render()
+    except:
+      context = {}
+      context['form'] = RegisterForm() 
+      print("email already in use, try again")
+      return render(request, "users/register.html",context)
+  print("loading request form")
+  context = {}
+  context['form'] = RegisterForm() 
+  return render(request, "users/register.html",context)
