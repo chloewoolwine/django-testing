@@ -1,15 +1,11 @@
 {% extends "pages/base.html" %}
 {% block content %}
-    {% for student in students %}
-        <article class="media content-section">
-          <div class="media-body">
-            <div class="article-metadata">
-              <a class="mr-2" href="#">{{ student.name }}</a>
-              <small class="text-muted">{{ student.id }}</small>
-            </div>
-            <p class="stat1">class: {{ student.stat }}</p>
-            <p class="stat2">learning points: {{ student.stat2 }}</p>
-          </div>
-        </article>
-    {% endfor %}
+  <div class="content-section">
+    <a href="{% url 'login' %}">
+      <button class="btn btn-outline-info">Login</button>
+    </a>
+    <a href="{% url 'register' %}">
+      <button class="btn btn-outline-info">Register</button>
+    </a>
+  </div>
 {% endblock content %}

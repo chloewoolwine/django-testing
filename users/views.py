@@ -30,8 +30,8 @@ def login(request):
       except:
         message = "Invalid Credentials! D:"
         return render(request, 'users/login.html', {"message":message})
-      session_id = user['idToken']
-      request.session['uid'] = str(session_id)
+      request.session['uid'] = user.get("localId")
+      request.session['email'] = email
       return HttpResponseRedirect('/') #goes to home page again
   context = {}
   context['form'] = LoginForm()
@@ -42,9 +42,7 @@ def logout(request):
     del request.session['uid']
   except:
     pass
-  context = {}
-  context['form'] = LoginForm()
-  return render(request, 'users/login.html', context=context)
+  return  HttpResponseRedirect('/login')
 
 def reset(request):
   if(request.method == 'POST'):

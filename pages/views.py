@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 import pyrebase
 # Create your views here.
 #def homePageView(request):
@@ -22,7 +22,16 @@ authe = firebase.auth()
 database = firebase.database()
 
 def home(request):
+    #if user is logged in-> redirect to classroom page
+    if('uid' in request.session):
+        uid = request.session['uid']
+        print(uid)
+        return  HttpResponseRedirect('/class')
+    #if user is not logged in-> display login buttons
     #todo: unique number identification for classes
+    return render(request, 'pages/home.html', {})
+
+def classview(request):
     students_data = database.child('class').child('students').get()
     students = []
     for student_data in students_data.each():
@@ -32,7 +41,4 @@ def home(request):
     context = {
         'students' : students
     }
-    return render(request, 'pages/home.html', context)
-
-def about(request):
-    return render(request, 'pages/about.html', {'title':'about'})
+    return render(request, 'pages/classview.html', context)
